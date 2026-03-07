@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crema - il passato</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital@0;1&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--seppia:#c8a96e;--seppia-dark:#8b6914;--seppia-light:#f5e6c8;--brown:#3d2b1f;--cream:#fdf6e3;--warm-grey:#9e8a72}
+  body{background:var(--cream);color:var(--brown);font-family:'Lora',serif}
+  header{background:linear-gradient(135deg,#2c1810 0%,#5c3317 50%,#3d2b1f 100%);text-align:center;padding:3rem 1rem 2.5rem;border-bottom:4px solid var(--seppia);position:relative;overflow:hidden}
+  header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8a96e' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:.4}
+  header h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);color:var(--seppia-light);letter-spacing:.05em;text-shadow:2px 2px 8px rgba(0,0,0,.5);position:relative}
+  header h1 span{color:var(--seppia);font-style:italic}
+  header p{color:#c8a96e99;font-size:1rem;margin-top:.6rem;font-style:italic;letter-spacing:.1em;position:relative}
+  .ornament{color:var(--seppia);font-size:1.4rem;margin:.5rem 0;display:block}
+  nav{background:#2c1810;display:flex;justify-content:center;gap:2rem;padding:.8rem;border-bottom:2px solid var(--seppia-dark);position:sticky;top:0;z-index:1000}
+  nav a{color:var(--seppia-light);text-decoration:none;font-size:.85rem;letter-spacing:.15em;text-transform:uppercase;font-family:'Lora',serif;transition:color .2s}
+  nav a:hover{color:var(--seppia)}
+  section{padding:2.5rem 1.5rem;max-width:1200px;margin:0 auto}
+  .section-title{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--seppia-dark);text-align:center;margin-bottom:.4rem}
+  .section-line{width:80px;height:2px;background:var(--seppia);margin:.5rem auto 1.5rem}
+  #map-section{padding:2rem 0 0}
+  #map{height:580px;width:100%;border:3px solid var(--seppia);box-shadow:0 4px 24px rgba(61,43,31,.3);filter:sepia(20%) saturate(90%)}
+  .map-caption{text-align:center;font-style:italic;color:var(--warm-grey);font-size:.85rem;padding:.7rem;background:#fdf0d5;border:1px solid #e0c99a;border-top:none}
+  #lightbox{display:none;position:fixed;inset:0;z-index:9999;background:rgba(20,10,5,.92);align-items:center;justify-content:center}
+  #lightbox.active{display:flex}
+  .lb-content{max-width:800px;width:90%;background:var(--cream);border:3px solid var(--seppia);position:relative;max-height:90vh;overflow-y:auto}
+  .lb-img{width:100%;max-height:500px;object-fit:contain;filter:sepia(25%);display:block;background:#1a0f08}
+  .lb-info{padding:1rem 1.2rem}
+  .lb-title{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--brown)}
+  .lb-meta{font-size:.8rem;color:var(--warm-grey);margin:.3rem 0 .6rem;font-style:italic}
+  .lb-desc{font-size:.85rem;color:#4a3020;line-height:1.6}
+  .lb-src{font-size:.78rem;margin-top:.6rem}
+  .lb-src a{color:var(--seppia-dark);font-style:italic}
+  .lb-close{position:absolute;top:.6rem;right:.8rem;font-size:1.8rem;cursor:pointer;color:var(--seppia);line-height:1;background:none;border:none;font-family:serif}
+  .lb-close:hover{color:var(--brown)}
+  #gallery-section{background:#fdf0d5;padding:2.5rem 1.5rem;border-top:2px solid #e0c99a;border-bottom:2px solid #e0c99a}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:1rem}
+  .gallery-item{cursor:pointer;overflow:hidden;border:2px solid #d4b483;transition:transform .2s,box-shadow .2s;background:#fff}
+  .gallery-item:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(61,43,31,.25)}
+  .gallery-item img{width:100%;height:110px;object-fit:cover;display:block;filter:sepia(35%) contrast(1.05);transition:filter .3s}
+  .gallery-item:hover img{filter:sepia(10%) contrast(1.1)}
+  .gallery-item-label{padding:.35rem .5rem;font-size:.72rem;color:var(--brown);line-height:1.3;background:var(--cream)}
+  .filter-bar{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.2rem}
+  .filter-btn{padding:.35rem .9rem;border:1px solid var(--seppia);background:transparent;color:var(--seppia-dark);cursor:pointer;font-family:'Lora',serif;font-size:.8rem;letter-spacing:.05em;transition:all .2s;border-radius:1px}
+  .filter-btn.active,.filter-btn:hover{background:var(--seppia);color:var(--cream)}
+  #contribute{text-align:center;padding:3rem 1.5rem;background:linear-gradient(135deg,#2c1810,#5c3317)}
+  #contribute h2{font-family:'Playfair Display',serif;color:var(--seppia-light);font-size:1.8rem;margin-bottom:.6rem}
+  #contribute p{color:#c8a96e99;font-style:italic;margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+  .btn-vintage{display:inline-block;padding:.8rem 2rem;border:2px solid var(--seppia);color:var(--seppia-light);text-decoration:none;font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:.1em;transition:all .3s}
+  .btn-vintage:hover{background:var(--seppia);color:#2c1810}
+  footer{text-align:center;padding:1.2rem;background:#1a0f08;color:#6b5040;font-size:.8rem;letter-spacing:.05em}
+  @media(max-width:600px){#map{height:380px}.gallery-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="ornament">✦ ✦ ✦</span>
+  <h1>Crema — <span>il passato</span></h1>
+  <p>Un viaggio fotografico nella storia della città</p>
+  <span class="ornament">✦ ✦ ✦</span>
+</header>
+
+<nav>
+  <a href="#map-section">Mappa</a>
+  <a href="#gallery-section">Galleria</a>
+  <a href="#contribute">Contribuisci</a>
+</nav>
+
+<section id="map-section">
+  <h2 class="section-title">La città nel tempo</h2>
+  <div class="section-line"></div>
+  <div id="map"></div>
+  <div class="map-caption">Clicca su un segnaposto per vedere la foto storica del luogo</div>
+</section>
+
+<section id="gallery-section">
+  <h2 class="section-title">Galleria fotografica</h2>
+  <div class="section-line"></div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="gallery-grid" id="gallery"></div>
+</section>
+
+<div id="contribute">
+  <h2>Sai qualcosa di più?</h2>
+  <p>Hai informazioni su una delle foto? Aiutaci ad arricchire le didascalie con la tua conoscenza.</p>
+  <a href="https://bit.ly/3cvKsxL" target="_blank" class="btn-vintage">Aggiungi un'informazione</a>
+</div>
+
+<footer>
+  <p>Crema — il passato &nbsp;·&nbsp; Archivio fotografico storico &nbsp;·&nbsp; Crema, Lombardia</p>
+</footer>
+
+<div id="lightbox">
+  <div class="lb-content">
+    <button class="lb-close" onclick="closeLightbox()">×</button>
+    <img id="lb-img" class="lb-img" src="" alt="">
+    <div class="lb-info">
+      <div class="lb-title" id="lb-title"></div>
+      <div class="lb-meta" id="lb-meta"></div>
+      <div class="lb-desc" id="lb-desc"></div>
+      <div class="lb-src" id="lb-src"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = "";  // le foto sono nella stessa cartella di index.html
+
+const photos = [
+  {id:1,desc:"1948 via Gaeta vista dal viale di S.Maria",file:"1948_viaGaeta.jpg",author:"Tacca",lat:45.368458,lng:9.69587445,caption:"Sulla sinistra le Cremerie Arrigoni, in fondo la trattoria Ferriera, a destra il canale Vacchelli.",src:"",tag:"vie"},
+  {id:2,desc:"Porta Piacenza",file:"portaPiacenza.jpg",author:"Vanelli",lat:45.36006134,lng:9.688718319,caption:"",src:"",tag:"porte"},
+  {id:3,desc:"Inizio via V. Emanuele",file:"viaVemanuele_SGiacomo.jpg",author:"Vanelli",lat:45.36001134,lng:9.688718319,caption:"",src:"",tag:"vie"},
+  {id:4,desc:"Piazza Duomo, fine Ottocento",file:"piazzaduomo.jpg",author:"Vanelli",lat:45.362914,lng:9.687046,caption:"",src:"",tag:"piazze"},
+  {id:5,desc:"Ponte Cadorna, Gamba da Lègn, 1917",file:"gambalegnponte.jpg",author:"Vanelli",lat:45.36378,lng:9.697315,caption:"Ultima corsa il 25 Aprile 1931. Il servizio iniziato nel 1880 fu soppresso a causa delle ingenti perdite.",src:"",tag:"trasporti"},
+  {id:6,desc:"Piazza Garibaldi anni '50",file:"pzagaribaldianni50.jpg",author:"Vanelli",lat:45.363326,lng:9.692495,caption:"",src:"",tag:"piazze"},
+  {id:7,desc:"Piazza Premoli angolo via Fino",file:"premolifino.jpg",author:"Vanelli",lat:45.360735,lng:9.686469,caption:"",src:"",tag:"piazze"},
+  {id:8,desc:"Via Racchetti vista da piazza Duomo, primi Novecento",file:"viaRacchettidapDuomo.jpg",author:"Vanelli",lat:45.363032,lng:9.68738,caption:"",src:"",tag:"vie"},
+  {id:9,desc:"Campo di Marte e Mura viste da Cresmiero, 1913",file:"campodimartemura.jpg",author:"Vanelli",lat:45.357835,lng:9.681702,caption:"",src:"",tag:"mura"},
+  {id:10,desc:"Via XX settembre primi Novecento",file:"via20settembrepriminovecento.jpg",author:"Vanelli",lat:45.362567,lng:9.686043,caption:"",src:"",tag:"vie"},
+  {id:11,desc:"Porta Ombriano verso S.Martino",file:"portaombrianoversotrinita.jpg",author:"Vanelli",lat:45.361139,lng:9.683297,caption:"",src:"",tag:"porte"},
+  {id:12,desc:"Dal Campanile del Duomo verso San Domenico",file:"dalCampanileversoSdomenicoungarico.jpg",author:"Vanelli",lat:45.36326,lng:9.687443,caption:"",src:"",tag:"duomo"},
+  {id:13,desc:"Dal Campanile del Duomo verso Torre Pretoria",file:"dalCampanileversoPretoria.jpg",author:"Vanelli",lat:45.363306,lng:9.687424,caption:"",src:"",tag:"duomo"},
+  {id:14,desc:"Dal Campanile del Duomo verso Torrazzo",file:"dalCampanileversoTorrazzo.jpg",author:"Vanelli",lat:45.363269,lng:9.687349,caption:"",src:"",tag:"duomo"},
+  {id:15,desc:"Le Villette dall'alto",file:"villettedallalto.jpg",author:"Vanelli",lat:45.366948,lng:9.692757,caption:"",src:"",tag:"vie"},
+  {id:16,desc:"Porta Ombriano",file:"portaOmbriano.jpg",author:"Vanelli",lat:45.360566,lng:9.682527,caption:"",src:"",tag:"porte"},
+  {id:17,desc:"Piazza Premoli",file:"piazzaPremoli.jpg",author:"Vanelli",lat:45.360883,lng:9.686456,caption:"",src:"",tag:"piazze"},
+  {id:18,desc:"Prime case di Crema Nuova",file:"primecaseCremaNuova.jpg",author:"Tacca",lat:45.364042,lng:9.679638,caption:"",src:"",tag:"vie"},
+  {id:19,desc:"Cascata Vacchelli Serio (1890 ca.)",file:"cascataVacchelliSerio.jpg",author:"Tacca",lat:45.368694,lng:9.696311,caption:"",src:"",tag:"vie"},
+  {id:20,desc:"Primi ippocastani in piazzale Rimembranze (1815 ca.)",file:"pzaleRimembranzeprimippocastani.jpg",author:"Tacca",lat:45.363473,lng:9.694997,caption:"",src:"",tag:"piazze"},
+  {id:21,desc:"Piazza Marconi",file:"piazzaMarconi.jpg",author:"Tacca",lat:45.364314,lng:9.685047,caption:"",src:"",tag:"piazze"},
+  {id:22,desc:"Stazione anni '50, littorina in partenza",file:"stazioneanni50.jpg",author:"Tacca",lat:45.366831,lng:9.694492,caption:"",src:"",tag:"trasporti"},
+  {id:23,desc:"Via Vitt. Emanuele, cartolina del 1916",file:"viaVEmanuele1916.jpg",author:"Tacca",lat:45.362754,lng:9.688352,caption:"Bar Centrale, calzoleria Membri, salumeria Toscani, barbiere Todeselli, panettiere Bertolli, tipografia Polenghi...",src:"",tag:"vie"},
+  {id:24,desc:"Via Civerchi, foto del 1966",file:"fineviaciverchi.jpg",author:"Tacca",lat:45.363927,lng:9.691279,caption:"In questa via nacquero tre illustri musicisti: Francesco Cavalli (1602), Giovanni Bottesini (1821), Vincenzo Petrali (1830).",src:"",tag:"vie"},
+  {id:25,desc:"Caserma S.Agostino",file:"casermanelsantagostino.jpg",author:"Tacca",lat:45.361996,lng:9.690931,caption:"Ex convento adibito a caserma fino al 1945.",src:"",tag:"vie"},
+  {id:26,desc:"Piazza Garibaldi — Albergo Sole",file:"albergoSolepzaGaribaldi.jpg",author:"Tacca",lat:45.363469,lng:9.692442,caption:"Nel 1520 chiamata piazza Castello, nel 1602 piazza S.Benedetto, nel 1887 piazza Garibaldi.",src:"",tag:"piazze"},
+  {id:27,desc:"Incrocio via Cadorna con via Cremona",file:"viaCadornaangviaCremona.jpg",author:"Tacca",lat:45.363877,lng:9.698736,caption:"Sullo sfondo il Gamba da Legn.",src:"",tag:"vie"},
+  {id:28,desc:"Ospedale civile, reparto manicomio, 1886",file:"manicomio.jpg",author:"Tacca",lat:45.358881,lng:9.688579,caption:"",src:"",tag:"vie"},
+  {id:29,desc:"Mappa del Massari",file:"Teresine.jpg",author:"Desti",lat:45.36029,lng:9.687004,caption:"",src:"",tag:"vie"},
+  {id:30,desc:"Ponte pedonale Villette",file:"ponteVillette.jpg",author:"Tacca",lat:45.369637,lng:9.689404,caption:"",src:"",tag:"vie"},
+  {id:31,desc:"Duomo",file:"Duomo.jpg",author:"Tacca",lat:45.363325,lng:9.686806,caption:"",src:"",tag:"duomo"},
+  {id:32,desc:"Via Verdi prima della chiusura della roggia Crema, 1943",file:"adrealacqua.jpg",author:"Tacca",lat:45.362589,lng:9.683179,caption:"Contrada adre a l'acqua → viale Dell'acqua → via Monte di Pietà → via Verdi (1951).",src:"",tag:"vie"},
+  {id:33,desc:"Palazzo comunale prima del restauro del 1958",file:"palazzoComunaleprima1958.jpg",author:"Tacca",lat:45.363229,lng:9.68682,caption:"Griglie in legno alle finestre, barbiere e caffè Torrazzo sotto i portici.",src:"",tag:"piazze"},
+  {id:34,desc:"Trattoria dell'Agnello, via V. Emanuele",file:"trattoriadellagnelloviaCavour.jpg",author:"Tacca",lat:45.36332,lng:9.68815,caption:"",src:"",tag:"vie"},
+  {id:35,desc:"Viale Repubblica",file:"vialeRepubblicaZucchi.jpg",author:"Tacca",lat:45.359294,lng:9.68063,caption:"A destra il Linificio Canapificio (1913–1955). A sinistra il pastificio Zucchi (1890–1970).",src:"",tag:"industria"},
+  {id:36,desc:"Pastificio Zucchi, verso via Adua",file:"pastificioZucchi.jpg",author:"Dandj",lat:45.360253,lng:9.682059,caption:"",src:"",tag:"industria"},
+  {id:37,desc:"Stazione Gamba da Legn, via Diaz, 1931",file:"StazioneGambadaLegnviadiaz.jpg",author:"Tacca",lat:45.362013,lng:9.692716,caption:"",src:"",tag:"trasporti"},
+  {id:38,desc:"Ponticello sul Cresmiero, anni '50",file:"ponticellosulcresmiero.jpg",author:"Tacca",lat:45.358092,lng:9.684301,caption:"",src:"",tag:"vie"},
+  {id:39,desc:"Via Palmieri, 1951",file:"viaPalmieri.jpg",author:"Tacca",lat:45.364889,lng:9.693628,caption:"Sistemazione stradale dai giardini di Porta Serio alla stazione ferroviaria.",src:"",tag:"vie"},
+  {id:40,desc:"Asilo Montessori in costruzione, 1935",file:"montessoricostruzione.jpg",author:"Tacca",lat:45.364875,lng:9.686658,caption:"",src:"",tag:"vie"},
+  {id:41,desc:"Porta Serio (esterno)",file:"portaserioesterno.jpg",author:"Cremaimmaginistoriche",lat:45.363445,lng:9.693433,caption:"",src:"",tag:"porte"},
+  {id:42,desc:"Campo di Marte e Mercato del Bestiame",file:"veduta-del-campo-di-marte-e-del-mercato-del-bestiame-di-crema.jpg",author:"Guglielmo",lat:45.359683,lng:9.681249,caption:"",src:"",tag:"piazze"},
+  {id:43,desc:"Viale Monte di Pietà (ora Mercato coperto)",file:"vialemontedipieta_adrealacqua.jpg",author:"Cremaimmaginistoriche",lat:45.363156,lng:9.683813,caption:"",src:"",tag:"vie"},
+  {id:44,desc:"4 Vie",file:"4vie.jpg",author:"Cremaimmaginistoriche",lat:45.363132,lng:9.688119,caption:"",src:"",tag:"vie"},
+  {id:45,desc:"Piazza San Martino",file:"piazzasanmartino.jpg",author:"Cremaimmaginistoriche",lat:45.360729,lng:9.682625,caption:"",src:"",tag:"piazze"},
+  {id:46,desc:"Piazza San Martino, 9 maggio 1906",file:"piazzaSmartino.jpg",author:"Cremaimmaginistoriche",lat:45.360806,lng:9.682693,caption:"",src:"",tag:"piazze"},
+  {id:47,desc:"Palazzo del Comune in ristrutturazione, anni '50",file:"comuneanni50ristrutturazione.jpg",author:"Cremaimmaginistoriche",lat:45.363327,lng:9.686963,caption:"",src:"",tag:"piazze"},
+  {id:48,desc:"Consorzio Agrario in costruzione",file:"ConsorzioAgrarioincostruzione.jpg",author:"Cremaimmaginistoriche",lat:45.359157,lng:9.677229,caption:"",src:"",tag:"industria"},
+  {id:49,desc:"Mura venete a San Giacomo",file:"muraaSgiacomo.jpg",author:"Cremaimmaginistoriche",lat:45.359679,lng:9.689027,caption:"",src:"",tag:"mura"},
+  {id:50,desc:"Mura e Cresmiero",file:"cresmieroemura.jpg",author:"Cremaimmaginistoriche",lat:45.359707,lng:9.688987,caption:"",src:"",tag:"mura"},
+  {id:51,desc:"Viale Repubblica",file:"vialeRepubblica.jpg",author:"Cremaimmaginistoriche",lat:45.35927,lng:9.680599,caption:"",src:"",tag:"vie"},
+  {id:52,desc:"Stalloni",file:"stalloni.jpg",author:"Cremaimmaginistoriche",lat:45.362984,lng:9.683525,caption:"",src:"",tag:"vie"},
+  {id:53,desc:"Angolo via Dante via Mazzini, 1909",file:"drogheriaangoloviadante.jpg",author:"Cremaimmaginistoriche",lat:45.363339,lng:9.691153,caption:"",src:"",tag:"vie"},
+  {id:54,desc:"La Buca col luna park visto dall'alto",file:"labucacollunapark.jpg",author:"Venturelli",lat:45.364911,lng:9.696912,caption:"",src:"",tag:"vie"},
+  {id:55,desc:"Piazza San Martino",file:"piazzaSMartino_locatelli.jpg",author:"Locatelli",lat:45.360956,lng:9.682899,caption:"",src:"",tag:"piazze"},
+  {id:56,desc:"Torre Pretoria",file:"TorrePretoria_orologio_Vanelli.jpg",author:"Vanelli",lat:45.362983,lng:9.686891,caption:"",src:"",tag:"piazze"},
+  {id:57,desc:"Piazza San Martino (Santa Trinità)",file:"santatrinita_vanelli.jpg",author:"Vanelli",lat:45.361029,lng:9.683285,caption:"",src:"",tag:"piazze"},
+  {id:58,desc:"Vescovato e Palazzo del Comune",file:"palazzovescovile_vanelli.jpg",author:"Vanelli",lat:45.363317,lng:9.686848,caption:"",src:"",tag:"piazze"},
+  {id:59,desc:"Porta Serio vista da Piazzale Rimembranze",file:"portaserio_da_rimembranze_vanelli.jpg",author:"Vanelli",lat:45.363561,lng:9.694692,caption:"",src:"",tag:"porte"},
+  {id:60,desc:"Macello, piazza Garibaldi",file:"Macello_vanelli.jpg",author:"Vanelli",lat:45.363367,lng:9.692242,caption:"",src:"",tag:"piazze"},
+  {id:61,desc:"Garibaldi, statua",file:"Garibaldi_vanelli.jpg",author:"Vanelli",lat:45.363352,lng:9.692372,caption:"",src:"",tag:"piazze"},
+  {id:62,desc:"Statua di Garibaldi con gente in posa",file:"StatuaGaribaldi_genteinposa_Vanelli.jpg",author:"Vanelli",lat:45.363305,lng:9.692304,caption:"",src:"",tag:"piazze"},
+  {id:63,desc:"Via XX settembre altezza via Tensini",file:"viaXXsettembrealtTensini.jpg",author:"CREMA",lat:45.362121,lng:9.685253,caption:"",src:"",tag:"vie"},
+  {id:64,desc:"Piazza Roma",file:"piazzaRoma.jpg",author:"Vanelli",lat:45.362599,lng:9.688403,caption:"",src:"",tag:"piazze"},
+  {id:65,desc:"Castello (dipinto)",file:"castello.jpg",author:"Righini",lat:45.364577,lng:9.694155,caption:"",src:"",tag:"vie"},
+  {id:66,desc:"Via Cavalli",file:"viaCavalli.jpg",author:"Vanelli",lat:45.366498,lng:9.68425,caption:"",src:"",tag:"vie"},
+  {id:67,desc:"Dormitorio Linificio e Canapificio Nazionale",file:"dormitorio_linificio_canapificio.jpg",author:"Vanelli",lat:45.359323,lng:9.680692,caption:"",src:"",tag:"industria"},
+  {id:68,desc:"Via Cavour all'altezza dell'osteria dell'Agnello (anni 20/30)",file:"viaCavour_altezzaAgnello.jpg",author:"Vanelli",lat:45.363509,lng:9.688065,caption:"",src:"",tag:"vie"},
+  {id:69,desc:"Everest — Capannoni ferri di cavallo, prima del 1935",file:"capannoniferridicavallo1930ca_galmozzi.jpg",author:"Centro Galmozzi",lat:45.371145,lng:9.695301,caption:"Nel 1934 venivano assemblate le macchine da scrivere EVEREST 42, prima macchina al mondo con tastiera su quattro file.",src:"",tag:"industria"},
+  {id:70,desc:"Quattro Vie",file:"QuattroVie_Vanelli.jpg",author:"Vanelli",lat:45.363013,lng:9.688263,caption:"",src:"",tag:"vie"},
+  {id:71,desc:"Duomo",file:"duomo_vanelli.jpg",author:"Vanelli",lat:45.362886,lng:9.686971,caption:"",src:"",tag:"duomo"},
+  {id:72,desc:"Via XX settembre, 1904 (allora Corso Ombriano)",file:"XXsettembre1904_Ercolani.jpg",author:"Ercolani",lat:45.362371,lng:9.685688,caption:"",src:"",tag:"vie"},
+  {id:73,desc:"Everest — Fabbrica Serio",file:"Everest_Serio_lacittadicrema.jpg",author:"CREMA",lat:45.370769,lng:9.694582,caption:"",src:"",tag:"industria"},
+  {id:74,desc:"Piazza Madeo (via Cavour)",file:"piazzaMadeo_Simonetti.jpg",author:"Simonetti",lat:45.364362,lng:9.688246,caption:"",src:"",tag:"piazze"},
+  {id:75,desc:"Via Ponte Furio, dove è stata costruita la Banca",file:"PonteFurio_Severgnini.jpg",author:"Severgnini",lat:45.362799,lng:9.685787,caption:"",src:"",tag:"vie"},
+  {id:76,desc:"Via Palmieri, 1 maggio 1947",file:"pratooraLicei_1947_Mascitti.jpg",author:"Mascitti",lat:45.365498,lng:9.694306,caption:"Dietro la palestra di via Stazione (ora ci sono i Licei Scientifico e Classico).",src:"",tag:"vie"},
+  {id:77,desc:"Vicolo Rino, angolo via Valera, 1975",file:"vicolorino1975_cgalmozzi.jpg",author:"Centro Galmozzi",lat:45.362369,lng:9.69105,caption:"",src:"",tag:"vie"},
+  {id:78,desc:"Fabbrica di campane Crespi, 1948",file:"fabbricacampanecrespi1948_cgalmozzi.jpg",author:"Centro Galmozzi",lat:45.359196,lng:9.704249,caption:"La famiglia Crespi ha operato per 10 generazioni, fondendo più di ventitremila campane.",src:"",tag:"industria"},
+  {id:79,desc:"Primo pastificio Zucchi, 1890",file:"PrimoPastificioZucchi1890.jpg",author:"Centro Galmozzi",lat:45.359456,lng:9.680955,caption:"",src:"",tag:"industria"},
+  {id:80,desc:"Vecchio e nuovo Pastificio Zucchi, 1920 ca.",file:"vecchioenuovopastificZucchi1920ca.jpg",author:"Centro Galmozzi",lat:45.359575,lng:9.681095,caption:"",src:"",tag:"industria"},
+  {id:81,desc:"Margarificio Arrigoni, 1923",file:"MargarificioArrigoni1923.jpg",author:"Centro Galmozzi",lat:45.368279,lng:9.694227,caption:"",src:"",tag:"industria"},
+  {id:82,desc:"Linificio e Canapificio, 1951",file:"Linificio1951_galmozzi.jpg",author:"Centro Galmozzi",lat:45.359829,lng:9.681492,caption:"",src:"",tag:"industria"},
+  {id:83,desc:"Ferriera e Villette, 1950 ca.",file:"FerrieraeVillette_1950ca.jpg",author:"Centro Galmozzi",lat:45.368264,lng:9.68911,caption:"Il muro che attraversa la foto è il confine a sud della Ferriera.",src:"",tag:"industria"},
+  {id:84,desc:"Olivetti dall'alto, 1975",file:"Olivetti_dalviale_1975.jpg",author:"Centro Galmozzi",lat:45.369245,lng:9.698447,caption:"",src:"",tag:"industria"},
+  {id:85,desc:"Everest, ingresso 1950",file:"Everest_ingressoViale_1950ca.jpg",author:"Centro Galmozzi",lat:45.37042,lng:9.69621,caption:"Nel 1940 la Serio contava 509 operai e 63 agenzie di vendita in Italia.",src:"",tag:"industria"},
+  {id:86,desc:"Tintoria piazza Garibaldi, 1900 ca.",file:"piazzaGaribaldi_tintoria_CGalmozzi.jpg",author:"Centro Galmozzi",lat:45.363199,lng:9.692159,caption:"",src:"",tag:"piazze"},
+  {id:87,desc:"Caffè Duomo, 1922",file:"CaffèDuomo_1922_CGalmozzi.jpg",author:"Centro Galmozzi",lat:45.362907,lng:9.68757,caption:"",src:"",tag:"piazze"},
+  {id:88,desc:"Piazza Fulcheria, 1965",file:"pzaFulcheria_1965_CGalmozzi.jpg",author:"Centro Galmozzi",lat:45.364517,lng:9.678869,caption:"",src:"",tag:"piazze"},
+  {id:89,desc:"Via XX settembre, 1973 — doppio senso!",file:"viaXXsettembre_1973_CGalmozzi.jpg",author:"Centro Galmozzi",lat:45.361369,lng:9.683769,caption:"",src:"",tag:"vie"},
+  {id:90,desc:"Piazza Garibaldi nel 1977",file:"pzaGaribaldi_1977_Cgalmozzi.jpg",author:"Centro Galmozzi",lat:45.362901,lng:9.692139,caption:"",src:"",tag:"piazze"},
+  {id:91,desc:"Viale Santa Maria da Piazzale Rimembranze",file:"vialevistodarimembranze_venchiarutti.jpg",author:"Venchiarutti",lat:45.364,lng:9.694807,caption:"",src:"",tag:"vie"},
+  {id:92,desc:"Porta Serio da Piazzale Rimembranze, 1931",file:"portaserio1931_venchiarutti.jpg",author:"Venchiarutti",lat:45.363469,lng:9.693773,caption:"",src:"",tag:"porte"},
+  {id:93,desc:"Porta Serio da Piazzale Rimembranze, 1932",file:"portaserio1932_venchiarutti.jpg",author:"Venchiarutti",lat:45.363474,lng:9.69384,caption:"",src:"",tag:"porte"},
+  {id:94,desc:"Ponte di Rialto, 1925",file:"pontedirialto1925_venchiarutti.jpg",author:"Venchiarutti",lat:45.363611,lng:9.695562,caption:"",src:"",tag:"vie"},
+  {id:95,desc:"Parco delle Rimembranze, 1925",file:"parcorimembranze1925_venchiarutti.jpg",author:"Venchiarutti",lat:45.363859,lng:9.694542,caption:"",src:"",tag:"piazze"},
+  {id:96,desc:"Ponticello giardini pubblici, 1913",file:"ponticelloGiardini1913_venchiarutti.jpg",author:"Venchiarutti",lat:45.364263,lng:9.694499,caption:"",src:"",tag:"vie"},
+  {id:97,desc:"Piazza Garibaldi, 1907",file:"inaugurazioneGaribaldi1885_venchiarutti.jpg",author:"Venchiarutti",lat:45.363311,lng:9.692355,caption:"",src:"",tag:"piazze"},
+  {id:98,desc:"Contrada di Porta Ombriano (via XX settembre), 1910",file:"ContradaPortaOmbriano_xxsettembre_1910_venchiarutti.jpg",author:"Venchiarutti",lat:45.362646,lng:9.686201,caption:"",src:"",tag:"vie"},
+  {id:99,desc:"Le 4 Vie, 1920",file:"Le4Vie_1920_venchiarutti.jpg",author:"Venchiarutti",lat:45.363337,lng:9.688132,caption:"",src:"",tag:"vie"},
+  {id:100,desc:"Piazza Duomo, 1901 — inaugurazione busto G. Bottesini",file:"inaug_busto_bottesini_1901_vechiarutti.jpg",author:"Venchiarutti",lat:45.363163,lng:9.686883,caption:"",src:"",tag:"piazze"},
+  {id:101,desc:"Coda al Macello, piazza Garibaldi, 1941",file:"CodaAlMacello_1941_Venchiarutti.jpg",author:"Venchiarutti",lat:45.363804,lng:9.692029,caption:"",src:"",tag:"piazze"},
+  {id:102,desc:"Porta Ombriano, 1909",file:"portaOmbriano_1909_venchiarutti.jpg",author:"Venchiarutti",lat:45.360479,lng:9.682407,caption:"",src:"",tag:"porte"},
+  {id:103,desc:"Parco tranviario in via Diaz del Gamba da Lègn",file:"stazioneTramviaDiaz_venchiarutti.jpg",author:"Venchiarutti",lat:45.362263,lng:9.692915,caption:"",src:"",tag:"trasporti"},
+  {id:104,desc:"Ingresso R. Deposito Stalloni",file:"ingressoStalloni_venchiarutti.jpg",author:"Venchiarutti",lat:45.362918,lng:9.683417,caption:"",src:"",tag:"vie"},
+  {id:105,desc:"Ponte del Serio, 1902",file:"ponteSerio1902_venchiarutti.jpg",author:"Venchiarutti",lat:45.363644,lng:9.696564,caption:"Lavori per l'aggiunta di una seconda passerella e la sostituzione delle travature.",src:"",tag:"vie"},
+  {id:106,desc:"Fabbrica Grioni, ferri di cavallo",file:"FabbricaGrioniFerridicavallo_venchiarutti.jpg",author:"Venchiarutti",lat:45.370698,lng:9.696444,caption:"",src:"",tag:"industria"},
+  {id:107,desc:"Porta Serio, 1900",file:"PortaSerio_1900_Venchiarutti.jpg",author:"Venchiarutti",lat:45.363442,lng:9.693416,caption:"",src:"",tag:"porte"},
+  {id:108,desc:"Gabbiotti del dazio, Porta Serio, 1900",file:"GabbiottiDazioPortaSerio_1900_Venchiarutti.jpg",author:"Venchiarutti",lat:45.363485,lng:9.693159,caption:"",src:"",tag:"porte"},
+  {id:109,desc:"Ingresso del centro di incremento ippico, 1930",file:"ingressostalloni.png",author:"Centro Galmozzi",lat:45.36291,lng:9.683803,caption:"",src:"",tag:"vie"},
+  {id:110,desc:"Teatro Sociale, ingresso — 6 luglio 1929",file:"Crema-teatro-sociale-3.jpg",author:"Wikipedia",lat:45.364496,lng:9.686084,caption:"Nella notte tra il 24 e 25 gennaio 1937 un incendio distrusse palcoscenico e tetto. Le cause non furono mai chiarite.",src:"",tag:"vie"},
+  {id:111,desc:"Quattro Vie con vigile in uniforme",file:"4vieconvigile.jpg",author:"CREMA",lat:45.363127,lng:9.688194,caption:"",src:"",tag:"vie"},
+  {id:112,desc:"Duomo, fine anni Venti XX secolo",file:"duomoanniventiforse.jpg",author:"CREMA",lat:45.363331,lng:9.686763,caption:"",src:"",tag:"duomo"},
+  {id:113,desc:"Coda al Macello, piazza Garibaldi, 1941",file:"codaalmacello2agmondiale.jpg",author:"CREMA",lat:45.36384,lng:9.692029,caption:"",src:"",tag:"piazze"},
+  {id:114,desc:"Teatro Sociale visto da via Bottesini",file:"teatrosociale_davBottesini.jpg",author:"Centro Galmozzi",lat:45.364616,lng:9.686612,caption:"",src:"",tag:"vie"},
+  {id:115,desc:"Buca e Van Den Bergh, anni '60/'70",file:"bucaanni6070.jpg",author:"Capitano",lat:45.365867,lng:9.695911,caption:"",src:"",tag:"vie"},
+  {id:116,desc:"Viale Repubblica anni '60/'70",file:"vialerepubblica6070.jpg",author:"",lat:45.359204,lng:9.680512,caption:"",src:"",tag:"vie"},
+  {id:117,desc:"Ponte sul Serio, primi del Novecento",file:"pontecadornaprimi900.jpg",author:"",lat:45.363759,lng:9.696885,caption:"",src:"",tag:"vie"},
+  {id:118,desc:"Piazza Fulcheria prima del 1965",file:"piazzafulcheriainterra.jpg",author:"CREMA",lat:45.36426,lng:9.679013,caption:"",src:"",tag:"piazze"},
+  {id:119,desc:"Torre Pretoria",file:"palazzoComunalecrema.jpg",author:"CREMA",lat:45.363224,lng:9.686666,caption:"",src:"",tag:"piazze"},
+  {id:120,desc:"Via Cavour angolo via Civerchi, 1968 — negozio lattaia",file:"viaChiesaOmbriano_anni60_Vanelli.jpg",author:"Vanelli",lat:45.363859,lng:9.688038,caption:"",src:"",tag:"vie"}
+];
+
+const tagLabels = {all:'Tutte',vie:'Vie',piazze:'Piazze',porte:'Porte',duomo:'Duomo',mura:'Mura',industria:'Industria',trasporti:'Trasporti'};
+let activeTag = 'all';
+
+const map = L.map('map').setView([45.3632,9.6879],15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);
+
+const pinIcon = L.divIcon({
+  className:'',
+  html:`<svg width="22" height="32" viewBox="0 0 22 32" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.9 0 0 4.9 0 11c0 8.3 11 21 11 21s11-12.7 11-21c0-6.1-4.9-11-11-11z" fill="#8b6914" stroke="#fdf6e3" stroke-width="1.5"/><circle cx="11" cy="11" r="4" fill="#fdf6e3"/></svg>`,
+  iconSize:[22,32],iconAnchor:[11,32],popupAnchor:[0,-34]
+});
+
+photos.forEach(p=>{
+  if(!p.lat||!p.lng) return;
+  const m = L.marker([p.lat,p.lng],{icon:pinIcon}).addTo(map);
+  m.on('click',()=>openLightbox(p));
+});
+
+const filterBar = document.getElementById('filterBar');
+Object.entries(tagLabels).forEach(([k,v])=>{
+  const btn = document.createElement('button');
+  btn.className='filter-btn'+(k==='all'?' active':'');
+  btn.textContent=v;
+  btn.onclick=()=>{
+    activeTag=k;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGallery();
+  };
+  filterBar.appendChild(btn);
+});
+
+function renderGallery(){
+  const g = document.getElementById('gallery');
+  g.innerHTML='';
+  const filtered = activeTag==='all' ? photos : photos.filter(p=>p.tag===activeTag);
+  filtered.forEach(p=>{
+    const div = document.createElement('div');
+    div.className='gallery-item';
+    div.innerHTML=`<img src="${BASE+p.file}" alt="${p.desc}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+      <div class="gallery-item-label">${p.desc}</div>`;
+    div.onclick=()=>openLightbox(p);
+    g.appendChild(div);
+  });
+}
+renderGallery();
+
+function openLightbox(p){
+  document.getElementById('lb-img').src = BASE+p.file;
+  document.getElementById('lb-title').textContent = p.desc;
+  document.getElementById('lb-meta').textContent = `Foto n.${p.id} · ${p.author||'—'}`;
+  document.getElementById('lb-desc').textContent = p.caption||'';
+  document.getElementById('lb-src').innerHTML = p.src ? `<a href="${p.src}" target="_blank">Vedi fonte originale ↗</a>` : '';
+  document.getElementById('lightbox').classList.add('active');
+  if(p.lat&&p.lng) map.setView([p.lat,p.lng],17);
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===this)closeLightbox()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
+</script>
+</body>
+</html>
