@@ -1,3 +1,4 @@
+<!-- Creato il: 2026-11-22 19:31 -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -111,6 +112,13 @@
 
 <script>
 const BASE = "";  // le foto sono nella stessa cartella di index.html
+const REMOTE = "https://github.com/lucasccrema/crema-storica/raw/main/";  // ripiego se le foto non sono accanto a index.html
+const encFile = f => encodeURI(f).replace(/&/g,'%26');
+const imgUrl = f => BASE + encFile(f);
+function imgFallback(img, file, onFail){
+  if(!img.dataset.fb){ img.dataset.fb='1'; img.src = REMOTE + encFile(file); }
+  else if(onFail){ onFail(); }
+}
 
 const photos = [
   {id:1,desc:"1948 via Gaeta vista dal viale di S.Maria",file:"1948_viaGaeta.jpg",author:"Tacca",lat:45.368458,lng:9.69587445,caption:"Sulla sinistra le Cremerie Arrigoni, in fondo la trattoria Ferriera, a destra il canale Vacchelli.",src:"",tag:"vie"},
@@ -232,7 +240,27 @@ const photos = [
   {id:117,desc:"Ponte sul Serio, primi del Novecento",file:"pontecadornaprimi900.jpg",author:"",lat:45.363759,lng:9.696885,caption:"",src:"",tag:"vie"},
   {id:118,desc:"Piazza Fulcheria prima del 1965",file:"piazzafulcheriainterra.jpg",author:"CREMA",lat:45.36426,lng:9.679013,caption:"",src:"",tag:"piazze"},
   {id:119,desc:"Torre Pretoria",file:"palazzoComunalecrema.jpg",author:"CREMA",lat:45.363224,lng:9.686666,caption:"",src:"",tag:"piazze"},
-  {id:120,desc:"Via Cavour angolo via Civerchi, 1968 — negozio lattaia",file:"viaChiesaOmbriano_anni60_Vanelli.jpg",author:"Vanelli",lat:45.363859,lng:9.688038,caption:"",src:"",tag:"vie"}
+  {id:120,desc:"Via Cavour angolo via Civerchi, 1968 — negozio lattaia",file:"casa via civerchi 1968.jpeg",author:"",lat:45.363859,lng:9.688038,caption:"",src:"",tag:"vie"},
+  {id:121,desc:"Derivazione della roggia Rino (Crenniera), foto ricolorata da immagine in bianco e nero",file:"roggia di porta ripalta.jpg",author:"",lat:45.359808,lng:9.687584,caption:"",src:"",tag:"vie"},
+  {id:122,desc:"Villette al Campo di Marte",file:"villetteCampodi Marte.jpg",author:"",lat:45.358681,lng:9.685352,caption:"",src:"",tag:"vie"},
+  {id:123,desc:"Piazza Duomo vista dall'edicola (stima fra 1936 e 1946)",file:"piazza duomo da edicola fra1936 e 1946.jpg",author:"",lat:45.362809,lng:9.686928,caption:"",src:"",tag:"piazze"},
+  {id:124,desc:"Cresmiero dal ponte di viale Repubblica",file:"cresmierolinificiodaCUrbino.jpg",author:"",lat:45.359172,lng:9.680538,caption:"",src:"",tag:"vie"},
+  {id:125,desc:"Ponte Cadorna visto da riva Castelnuovo",file:"ponteviacadorna_da riva Casteln.jpg",author:"",lat:45.363576,lng:9.697279,caption:"",src:"",tag:"vie"},
+  {id:126,desc:"Giardino del Bar della Stazione",file:"giardino del Bar della Stazione.jpg",author:"",lat:45.366629,lng:9.694835,caption:"",src:"",tag:"vie"},
+  {id:127,desc:"Via Brescia (posizione approssimativa)",file:"viaBrescia.jpg",author:"",lat:45.368323,lng:9.707408,caption:"",src:"",tag:"vie"},
+  {id:128,desc:"Pastificio Zucchi, 1920",file:"pastificioZucchi_1920.jpg",author:"Centro Galmozzi",lat:45.360403,lng:9.680252,caption:"",src:"",tag:"industria"},
+  {id:129,desc:"Acquarossa a Ombriano",file:"Acquarossa_a_Ombriano.jpg",author:"Centro Galmozzi",lat:45.354722,lng:9.646474,caption:"Questa è L' Acqua Rossa, uno dei maggiori corsi d'acqua, assieme alla Roggia Comuna e L'Alchina, che tutt'ora corrono lungo le case di Ombriano. Sul lato opposto della via, allora sterrata, corre la Senazza, oggi tombinata. Si notino i gradini marmorei dove le donne effettuavano i bucati a mano, o quantomeno la fase dei risciacqui.",src:"",tag:"vie"},
+  {id:130,desc:"Albergo del Papa",file:"Albergo_del_Papa.jpg",author:"Centro Galmozzi",lat:45.361105,lng:9.683225,caption:"Durante la ritirata dell'esercito austriaco da Milano nel marzo del 1848, a seguito delle Cinque Giornate, le truppe del feldmaresciallo Radetzky e alti funzionari asburgici ripiegarono a Crema. Il temuto capo della polizia di Milano, il barone Carlo Torresani di Lanzfeld pernottò all'Albergo del Papa di Crema",src:"",tag:"vie"},
+  {id:131,desc:"Uscendo da Porta Serio, 1909",file:"uscendo_da_porta_Serio_1909.jpg",author:"Centro Galmozzi",lat:45.363418,lng:9.693627,caption:"\"Il panorama che si ammirava uscendo dalla Porta Serio di Crema\". Data: 1909",src:"",tag:"porte"},
+  {id:132,desc:"Viale Repubblica visto dal ponte",file:"viale_Repubblica_dal_ponte.jpg",author:"",lat:45.359211,lng:9.68058,caption:"",src:"",tag:"vie"},
+  {id:133,desc:"Ferriera (scarti ferrosi) vista dalla Stazione",file:"Scarti_della_Ferriera.jpg",author:"",lat:45.367383,lng:9.692594,caption:"",src:"",tag:"industria"},
+  {id:134,desc:"Villa&Bonaldi, quando era in via Mercato (1908)",file:"Villa&Bonaldi_via_Mercato_1908.jpg",author:"",lat:45.36553,lng:9.684014,caption:"",src:"",tag:"vie"},
+  {id:135,desc:"Roggia Sanassa (Sennazza, Senatia) a Ombriano",file:"Roggia_Sanassa_Ombriano.jpg",author:"",lat:45.357693,lng:9.64667,caption:"La Sanasa, in questa foto , arrivava dal GURG DALE CAMPANE , arrivava in Ombriano dal Milani , percorreva via Torre arrivava a via Chiesa , arrivava alla Madunina e le ghe amò ( L'Arden ) È stata tombinata perché non scorreva più acqua ma era piena di fango , i contadini prendevano l'acqua per bagnare i campi dall'Alchina , l'acqua rossa , alSanasu , al GURG Dale Campane . Le case che si vedono sulla destra , sono quelle di via Monte Nevoso , mi ricordo quando è stata tombinata , è stata allargata la strada e sono spariti i numerosi topi che la abitavano . (R. Regazzetti, commento su FB)",src:"",tag:"vie"},
+  {id:136,desc:"Platano di via Castello che viene tagliato",file:"Platano_via_Castello.jpg",author:"",lat:45.364753,lng:9.692106,caption:"Il 15 settembre del 1971 si chiude un'era. Iniziano \"i lavori di abbattimento del grande platano di via Castello\". (foto archivio centro ricerca Alfredo Galmozzi) Via Castello da prima sterrata è stata asfaltata danneggiando e coprendo le sue radici… sull'altro lato invece la roggia sulla cui sponda si estendeva l'apparato radicale del grande Platano è stata intubata , tagliando altre importanti radici . L'albero si è così trovato attaccato da più fronti e non ce l'ha fatta a sopportare tutto questo. (da un commento su fb)",src:"",tag:"vie"},
+  {id:137,desc:"Via Kennedy (allora via Piacenza), Stazione Sperimentale",file:"viaKennedyStazioneSperimentale.jpg",author:"Museo Civico",lat:45.35805,lng:9.68846,caption:"Ripresa dall'archivio fotografico del Museo civico di Crema, una bella veduta della città di Crema. In questa immagine, databile tra il 1910 e 1920, si può ammirare via Piacenza, oggi via Kennedy, e la stazione sperimentale di Batteriologia agraria con di fronte le rotaie del tram Lodi-Crema-Soncino.",src:"",tag:"vie"},
+  {id:138,desc:"Via Massari (1969)",file:"viaMassari_1969.jpg",author:"Centro Galmozzi",lat:45.362199,lng:9.682379,caption:"si intravede in fondo ancora la falegnameria addossata alle mura venete",src:"",tag:"vie"},
+  {id:139,desc:"Via Battaglio (S. Maria)",file:"via_Battaglio_SMaria.jpg",author:"",lat:45.375127,lng:9.695611,caption:"",src:"",tag:"vie"},
+  {id:140,desc:"Via Chiesa, Ombriano, anni '60",file:"viaChiesaOmbriano_anni60_Vanelli.jpg",author:"Vanelli",lat:45.352861,lng:9.647779,caption:"",src:"",tag:"vie"}
 ];
 
 const tagLabels = {all:'Tutte',vie:'Vie',piazze:'Piazze',porte:'Porte',duomo:'Duomo',mura:'Mura',industria:'Industria',trasporti:'Trasporti'};
@@ -274,8 +302,10 @@ function renderGallery(){
   filtered.forEach(p=>{
     const div = document.createElement('div');
     div.className='gallery-item';
-    div.innerHTML=`<img src="${BASE+p.file}" alt="${p.desc}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
+    div.innerHTML=`<img src="${imgUrl(p.file)}" alt="${p.desc}" loading="lazy">
       <div class="gallery-item-label">${p.desc}</div>`;
+    const im = div.querySelector('img');
+    im.onerror = () => imgFallback(im, p.file, () => { div.style.display='none'; });
     div.onclick=()=>openLightbox(p);
     g.appendChild(div);
   });
@@ -283,7 +313,10 @@ function renderGallery(){
 renderGallery();
 
 function openLightbox(p){
-  document.getElementById('lb-img').src = BASE+p.file;
+  const lb = document.getElementById('lb-img');
+  delete lb.dataset.fb;
+  lb.onerror = () => imgFallback(lb, p.file, () => { lb.removeAttribute('src'); });
+  lb.src = imgUrl(p.file);
   document.getElementById('lb-title').textContent = p.desc;
   document.getElementById('lb-meta').textContent = `Foto n.${p.id} · ${p.author||'—'}`;
   document.getElementById('lb-desc').textContent = p.caption||'';
