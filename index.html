@@ -1,4 +1,4 @@
-<!-- Creato il: 2026-11-22 19:31 -->
+<!-- Creato il: 2026-11-22 20:42 -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -37,6 +37,8 @@
   .lb-desc{font-size:.85rem;color:#4a3020;line-height:1.6}
   .lb-src{font-size:.78rem;margin-top:.6rem}
   .lb-src a{color:var(--seppia-dark);font-style:italic}
+  .lb-form{font-size:.8rem;margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--seppia-light)}
+  .lb-form a{color:var(--seppia-dark);font-weight:bold}
   .lb-close{position:absolute;top:.6rem;right:.8rem;font-size:1.8rem;cursor:pointer;color:var(--seppia);line-height:1;background:none;border:none;font-family:serif}
   .lb-close:hover{color:var(--brown)}
   #gallery-section{background:#fdf0d5;padding:2.5rem 1.5rem;border-top:2px solid #e0c99a;border-bottom:2px solid #e0c99a}
@@ -106,12 +108,16 @@
       <div class="lb-meta" id="lb-meta"></div>
       <div class="lb-desc" id="lb-desc"></div>
       <div class="lb-src" id="lb-src"></div>
+      <div class="lb-form" id="lb-form"></div>
     </div>
   </div>
 </div>
 
 <script>
 const BASE = "";  // le foto sono nella stessa cartella di index.html
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf-zISw_i8Hf_oSl0GKk_ZKrVlDbr5MG6DFZMtfuOJRvzbCjA/viewform";
+const FORM_ENTRY = "entry.1050169940";  // id della domanda "numero della foto" del form (se vuoto, il numero non viene precompilato)
+const formLink = p => FORM_ENTRY ? `${FORM_URL}?usp=pp_url&${FORM_ENTRY}=${p.id}` : FORM_URL;
 const REMOTE = "https://github.com/lucasccrema/crema-storica/raw/main/";  // ripiego se le foto non sono accanto a index.html
 const encFile = f => encodeURI(f).replace(/&/g,'%26');
 const imgUrl = f => BASE + encFile(f);
@@ -321,6 +327,7 @@ function openLightbox(p){
   document.getElementById('lb-meta').textContent = `Foto n.${p.id} · ${p.author||'—'}`;
   document.getElementById('lb-desc').textContent = p.caption||'';
   document.getElementById('lb-src').innerHTML = p.src ? `<a href="${p.src}" target="_blank">Vedi fonte originale ↗</a>` : '';
+  document.getElementById('lb-form').innerHTML = `<a href="${formLink(p)}" target="_blank" rel="noopener">Hai informazioni su questa foto? Segnalale ↗</a>` + (FORM_ENTRY ? '' : ` <span style="color:var(--warm-grey)">(indica la foto n.${p.id})</span>`);
   document.getElementById('lightbox').classList.add('active');
   if(p.lat&&p.lng) map.setView([p.lat,p.lng],17);
 }
